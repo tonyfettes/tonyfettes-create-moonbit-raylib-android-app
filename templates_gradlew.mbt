@@ -1,7 +1,7 @@
 ///|
 /// gradlew shell script
 fn gradlew_script() -> String {
-  let s =
+  (
     #|#!/bin/sh
     #|
     #|#
@@ -253,7 +253,7 @@ fn gradlew_script() -> String {
     #|    )" '"$@"'
     #|
     #|exec "$JAVACMD" "$@"
-  s
+  )
 }
 
 ///|

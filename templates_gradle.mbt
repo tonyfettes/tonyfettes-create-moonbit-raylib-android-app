@@ -35,12 +35,12 @@ fn settings_gradle_kts(c : ProjectConfig) -> String {
 ///|
 /// build.gradle.kts (root)
 fn root_build_gradle_kts() -> String {
-  let s =
+  (
     #|// Top-level build file where you can add configuration options common to all sub-projects/modules.
     #|plugins {
     #|    alias(libs.plugins.android.application) apply false
     #|}
-  s
+  )
 }
 
 ///|
@@ -124,7 +124,7 @@ fn app_build_gradle_kts(c : ProjectConfig) -> String {
 ///|
 /// gradle.properties
 fn gradle_properties() -> String {
-  let s =
+  (
     #|# Project-wide Gradle settings.
     #|# IDE (e.g. Android Studio) users:
     #|# Gradle settings configured through the IDE *will override*
@@ -148,7 +148,7 @@ fn gradle_properties() -> String {
     #|# resources declared in the library itself and none from the library's dependencies,
     #|# thereby reducing the size of the R class for that library
     #|android.nonTransitiveRClass=true
-  s
+  )
 }
 
 ///|
@@ -180,7 +180,7 @@ fn libs_versions_toml() -> String {
 ///|
 /// gradle/wrapper/gradle-wrapper.properties
 fn gradle_wrapper_properties() -> String {
-  let s =
+  (
     #|distributionBase=GRADLE_USER_HOME
     #|distributionPath=wrapper/dists
     #|distributionSha256Sum=72f44c9f8ebcb1af43838f45ee5c4aa9c5444898b3468ab3f4af7b6076c5bc3f
@@ -189,5 +189,5 @@ fn gradle_wrapper_properties() -> String {
     #|validateDistributionUrl=true
     #|zipStoreBase=GRADLE_USER_HOME
     #|zipStorePath=wrapper/dists
-  s
+  )
 }

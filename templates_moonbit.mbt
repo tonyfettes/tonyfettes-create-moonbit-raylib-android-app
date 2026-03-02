@@ -98,7 +98,7 @@ fn gen_moon_mod_json(c : ProjectConfig) -> String {
 ///|
 /// moon.pkg for the generated project's moonbit directory
 fn gen_moon_pkg_content() -> String {
-  let s =
+  (
     #|import {
     #|  "tonyfettes/raylib",
     #|}
@@ -106,5 +106,5 @@ fn gen_moon_pkg_content() -> String {
     #|options(
     #|  "is-main": true,
     #|)
-  s
+  )
 }
