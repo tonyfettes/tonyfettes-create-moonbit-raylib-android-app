@@ -2,39 +2,34 @@
 /// settings.gradle.kts
 fn settings_gradle_kts(c : ProjectConfig) -> String {
   let display_name = c.display_name
-  let buf = StringBuilder::new()
-  buf.write_string(
-    (
-      #|pluginManagement {
-      #|    repositories {
-      #|        google {
-      #|            content {
-      #|                includeGroupByRegex("com\\.android.*")
-      #|                includeGroupByRegex("com\\.google.*")
-      #|                includeGroupByRegex("androidx.*")
-      #|            }
-      #|        }
-      #|        mavenCentral()
-      #|        gradlePluginPortal()
-      #|    }
-      #|}
-      #|plugins {
-      #|    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-      #|}
-      #|dependencyResolutionManagement {
-      #|    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-      #|    repositories {
-      #|        google()
-      #|        mavenCentral()
-      #|    }
-      #|}
-      #|
-    ),
+  (
+    #|pluginManagement {
+    #|    repositories {
+    #|        google {
+    #|            content {
+    #|                includeGroupByRegex("com\\.android.*")
+    #|                includeGroupByRegex("com\\.google.*")
+    #|                includeGroupByRegex("androidx.*")
+    #|            }
+    #|        }
+    #|        mavenCentral()
+    #|        gradlePluginPortal()
+    #|    }
+    #|}
+    #|plugins {
+    #|    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    #|}
+    #|dependencyResolutionManagement {
+    #|    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    #|    repositories {
+    #|        google()
+    #|        mavenCentral()
+    #|    }
+    #|}
+    $|rootProject.name = "\{display_name}"
+    #|include(":app")
+    #|
   )
-  buf.write_string(
-    "rootProject.name = \"\{display_name}\"\ninclude(\":app\")\n",
-  )
-  buf.to_string()
 }
 
 ///|
@@ -52,94 +47,78 @@ fn root_build_gradle_kts() -> String {
 /// app/build.gradle.kts
 fn app_build_gradle_kts(c : ProjectConfig) -> String {
   let package_id = c.package_id
-  let buf = StringBuilder::new()
-  buf.write_string(
-    (
-      #|plugins {
-      #|    alias(libs.plugins.android.application)
-      #|}
-      #|
-      #|android {
-      #|    namespace = "com.example.
-    ),
+  (
+    #|plugins {
+    #|    alias(libs.plugins.android.application)
+    #|}
+    #|
+    #|android {
+    $|    namespace = "com.example.\{package_id}"
+    #|    compileSdk {
+    #|        version = release(36) {
+    #|            minorApiLevel = 1
+    #|        }
+    #|    }
+    #|
+    #|    defaultConfig {
+    $|        applicationId = "com.example.\{package_id}"
+    #|        minSdk = 26
+    #|        targetSdk = 36
+    #|        versionCode = 1
+    #|        versionName = "0.1.0"
+    #|
+    #|        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    #|
+    #|        ndk {
+    #|            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+    #|        }
+    #|        externalNativeBuild {
+    #|            cmake {
+    #|                arguments("-DANDROID_STL=c++_shared")
+    #|            }
+    #|        }
+    #|    }
+    #|
+    #|    signingConfigs {
+    #|        create("release") {
+    #|            storeFile = rootProject.file("release-key.jks")
+    #|            storePassword = "android"
+    #|            keyAlias = "release"
+    #|            keyPassword = "android"
+    #|        }
+    #|    }
+    #|    buildTypes {
+    #|        release {
+    #|            isMinifyEnabled = false
+    #|            proguardFiles(
+    #|                getDefaultProguardFile("proguard-android-optimize.txt"),
+    #|                "proguard-rules.pro"
+    #|            )
+    #|            signingConfig = signingConfigs.getByName("release")
+    #|        }
+    #|    }
+    #|    compileOptions {
+    #|        sourceCompatibility = JavaVersion.VERSION_11
+    #|        targetCompatibility = JavaVersion.VERSION_11
+    #|    }
+    #|    externalNativeBuild {
+    #|        cmake {
+    #|            path = file("src/main/cpp/CMakeLists.txt")
+    #|            version = "3.22.1"
+    #|        }
+    #|    }
+    #|}
+    #|
+    #|dependencies {
+    #|    implementation(libs.androidx.core.ktx)
+    #|    implementation(libs.androidx.appcompat)
+    #|    implementation(libs.material)
+    #|    testImplementation(libs.junit)
+    #|    androidTestImplementation(libs.androidx.junit)
+    #|    androidTestImplementation(libs.androidx.espresso.core)
+    #|}
+    #|
   )
-  buf.write_string(package_id)
-  buf.write_string(
-    (
-      #|"
-      #|    compileSdk {
-      #|        version = release(36) {
-      #|            minorApiLevel = 1
-      #|        }
-      #|    }
-      #|
-      #|    defaultConfig {
-      #|        applicationId = "com.example.
-    ),
-  )
-  buf.write_string(package_id)
-  buf.write_string(
-    (
-      #|"
-      #|        minSdk = 26
-      #|        targetSdk = 36
-      #|        versionCode = 1
-      #|        versionName = "0.1.0"
-      #|
-      #|        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-      #|
-      #|        ndk {
-      #|            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
-      #|        }
-      #|        externalNativeBuild {
-      #|            cmake {
-      #|                arguments("-DANDROID_STL=c++_shared")
-      #|            }
-      #|        }
-      #|    }
-      #|
-      #|    signingConfigs {
-      #|        create("release") {
-      #|            storeFile = rootProject.file("release-key.jks")
-      #|            storePassword = "android"
-      #|            keyAlias = "release"
-      #|            keyPassword = "android"
-      #|        }
-      #|    }
-      #|    buildTypes {
-      #|        release {
-      #|            isMinifyEnabled = false
-      #|            proguardFiles(
-      #|                getDefaultProguardFile("proguard-android-optimize.txt"),
-      #|                "proguard-rules.pro"
-      #|            )
-      #|            signingConfig = signingConfigs.getByName("release")
-      #|        }
-      #|    }
-      #|    compileOptions {
-      #|        sourceCompatibility = JavaVersion.VERSION_11
-      #|        targetCompatibility = JavaVersion.VERSION_11
-      #|    }
-      #|    externalNativeBuild {
-      #|        cmake {
-      #|            path = file("src/main/cpp/CMakeLists.txt")
-      #|            version = "3.22.1"
-      #|        }
-      #|    }
-      #|}
-      #|
-      #|dependencies {
-      #|    implementation(libs.androidx.core.ktx)
-      #|    implementation(libs.androidx.appcompat)
-      #|    implementation(libs.material)
-      #|    testImplementation(libs.junit)
-      #|    androidTestImplementation(libs.androidx.junit)
-      #|    androidTestImplementation(libs.androidx.espresso.core)
-      #|}
-      #|
-    ),
-  )
-  buf.to_string()
 }
 
 ///|

@@ -1,23 +1,9 @@
-///|
-/// Replace all occurrences of a placeholder in a string
-fn replace_all(s : String, old : String, new_ : String) -> String {
-  let mut result = s
-  // Keep replacing until no more matches
-  while result.contains(old) {
-    result = result.replace(old~, new=new_)
-  }
-  result
-}
-
 ///| CMakeLists.txt for the native build.
-
-///|
-/// Uses placeholder {{PKG}} which is replaced with the actual package_id.
 fn cmake_lists_txt(c : ProjectConfig) -> String {
   let pkg = c.package_id
-  let s =
+  (
     #|cmake_minimum_required(VERSION 3.22.1)
-    #|project("{{PKG}}" C)
+    $|project("\{pkg}" C)
     #|
     #|set(MOONBIT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../moonbit)
     #|set(NATIVE_APP_GLUE_DIR ${ANDROID_NDK}/sources/android/native_app_glue)
@@ -38,7 +24,7 @@ fn cmake_lists_txt(c : ProjectConfig) -> String {
     #|add_subdirectory(${RAYLIB_MOONBIT_DIR} raylib_build)
     #|
     #|set(MOONBIT_GENERATED_C
-    #|    ${MOONBIT_DIR}/_build/native/debug/build/{{PKG}}.c)
+    $|    ${MOONBIT_DIR}/_build/native/debug/build/\{pkg}.c)
     #|add_custom_target(moonbit_codegen ALL
     #|    COMMAND ${MOON_EXECUTABLE} build --target native
     #|    WORKING_DIRECTORY ${MOONBIT_DIR}
@@ -55,18 +41,18 @@ fn cmake_lists_txt(c : ProjectConfig) -> String {
     #|target_compile_options(moonbit_runtime PRIVATE
     #|    -fwrapv -fno-strict-aliasing -Wno-unused-value)
     #|
-    #|add_library({{PKG}} SHARED
+    $|add_library(\{pkg} SHARED
     #|    ${MOONBIT_GENERATED_C}
     #|    $<TARGET_OBJECTS:moonbit_runtime>
     #|    ${NATIVE_APP_GLUE_DIR}/android_native_app_glue.c
     #|)
-    #|target_include_directories({{PKG}} PRIVATE
+    $|target_include_directories(\{pkg} PRIVATE
     #|    ${NATIVE_APP_GLUE_DIR})
-    #|target_compile_definitions({{PKG}} PRIVATE PLATFORM_ANDROID)
+    $|target_compile_definitions(\{pkg} PRIVATE PLATFORM_ANDROID)
     #|set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
     #|# raylib_moonbit brings in: stubs + raylib core + Android system libs +
     #|# MOON_HOME/include + RAYLIB_SRC_DIR — all transitively via PUBLIC properties.
-    #|add_dependencies({{PKG}} moonbit_codegen)
-    #|target_link_libraries({{PKG}} raylib_moonbit)
-  replace_all(s, "{{PKG}}", pkg)
+    $|add_dependencies(\{pkg} moonbit_codegen)
+    $|target_link_libraries(\{pkg} raylib_moonbit)
+  )
 }

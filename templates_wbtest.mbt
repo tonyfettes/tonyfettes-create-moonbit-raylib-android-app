@@ -440,13 +440,3 @@ test "app_build_gradle_kts" {
     ),
   )
 }
-
-///|
-test "replace_all" {
-  inspect(
-    replace_all("hello {{NAME}} and {{NAME}}", "{{NAME}}", "world"),
-    content=(
-      #|hello world and world
-    ),
-  )
-}
