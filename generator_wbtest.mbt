@@ -1027,6 +1027,38 @@ async test "generate creates moonbit and cmake files" {
 }
 
 ///|
+async test "generate detects SDK from default path when env vars unset" {
+  let config = derive_names("GenTestSdkFallback", "landscape", "testuser")
+  let name = config.project_name
+  if @fs.exists(name) {
+    @fs.rmdir(name, recursive=true)
+  }
+  // Create a fake SDK directory at the macOS default path
+  let fake_home = "gen-test-sdk-home"
+  let fake_sdk = "\{fake_home}/Library/Android/sdk"
+  if @fs.exists(fake_home) {
+    @fs.rmdir(fake_home, recursive=true)
+  }
+  @fs.mkdir(fake_sdk, permission=0o755, recursive=true)
+  env_mutex.acquire()
+  @sys.unset_env_var("ANDROID_HOME")
+  @sys.unset_env_var("ANDROID_SDK_ROOT")
+  let original_home = @sys.get_env_var("HOME")
+  @sys.set_env_var("HOME", fake_home)
+  generate(config)
+  // Verify local.properties was written with the auto-detected path
+  inspect(read_text("\{name}/local.properties"), content="sdk.dir=\{fake_sdk}\n")
+  // Restore environment
+  match original_home {
+    Some(h) => @sys.set_env_var("HOME", h)
+    None => @sys.unset_env_var("HOME")
+  }
+  env_mutex.release()
+  @fs.rmdir(name, recursive=true)
+  @fs.rmdir(fake_home, recursive=true)
+}
+
+///|
 async test "generate skips existing directory" {
   let config = derive_names("GenTestSkip", "landscape", "testuser")
   let name = config.project_name

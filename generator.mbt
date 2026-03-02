@@ -17,6 +17,53 @@ async fn write_executable(path : String, content : String) -> Unit {
 }
 
 ///|
+/// Detect the Android SDK directory by checking environment variables
+/// and well-known default installation paths.
+async fn detect_android_sdk() -> String? {
+  match @sys.get_env_var("ANDROID_HOME") {
+    Some(v) => return Some(v)
+    None => ()
+  }
+  match @sys.get_env_var("ANDROID_SDK_ROOT") {
+    Some(v) => return Some(v)
+    None => ()
+  }
+  // Probe well-known default paths
+  match @sys.get_env_var("HOME") {
+    Some(home) => {
+      let macos_path = "\{home}/Library/Android/sdk"
+      if @fs.exists(macos_path) {
+        return Some(macos_path)
+      }
+      let linux_path = "\{home}/Android/Sdk"
+      if @fs.exists(linux_path) {
+        return Some(linux_path)
+      }
+    }
+    None => ()
+  }
+  match @sys.get_env_var("LOCALAPPDATA") {
+    Some(appdata) => {
+      let win_path = "\{appdata}/Android/Sdk"
+      if @fs.exists(win_path) {
+        return Some(win_path)
+      }
+    }
+    None => ()
+  }
+  match @sys.get_env_var("USERPROFILE") {
+    Some(profile) => {
+      let win_path = "\{profile}/AppData/Local/Android/Sdk"
+      if @fs.exists(win_path) {
+        return Some(win_path)
+      }
+    }
+    None => ()
+  }
+  None
+}
+
+///|
 /// Generate the complete project
 async fn generate(config : ProjectConfig) -> Unit raise Error {
   let name = config.project_name
@@ -136,23 +183,15 @@ async fn generate(config : ProjectConfig) -> Unit raise Error {
 
   // Try to detect Android SDK and write local.properties
   let lp_path = "\{name}/local.properties"
-  let sdk_dir : String? = match @sys.get_env_var("ANDROID_HOME") {
-    Some(v) => Some(v)
-    None => @sys.get_env_var("ANDROID_SDK_ROOT")
-  }
-  let sdk_detected = match sdk_dir {
+  match detect_android_sdk() {
     Some(dir) => {
       write_file(lp_path, "sdk.dir=\{dir}\n")
-      true
+      println("Detected Android SDK, wrote local.properties")
     }
-    None => false
-  }
-  if sdk_detected {
-    println("Detected Android SDK, wrote local.properties")
-  } else {
-    raise Failure::Failure(
-      "Could not detect Android SDK. Please set ANDROID_HOME or ANDROID_SDK_ROOT.",
-    )
+    None =>
+      raise Failure::Failure(
+        "Could not detect Android SDK. Please install Android Studio (https://developer.android.com/studio) or set the ANDROID_HOME environment variable.",
+      )
   }
 
   // Success message
