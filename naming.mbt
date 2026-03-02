@@ -7,7 +7,7 @@ struct ProjectConfig {
   theme_name : String // e.g. "Theme.MyBouncingBall"
   module_name : String // e.g. "username/mybouncingball"
   orientation : String // "landscape" or "portrait"
-}
+} derive(Show)
 
 ///|
 /// Convert PascalCase name to lowercase package id
