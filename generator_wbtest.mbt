@@ -1059,6 +1059,27 @@ async test "generate detects SDK from default path when env vars unset" {
 }
 
 ///|
+async test "generate escapes backslashes in SDK path for local.properties" {
+  let config = derive_names("GenTestSdkWinPath", "landscape", "testuser")
+  let name = config.project_name
+  if @fs.exists(name) {
+    @fs.rmdir(name, recursive=true)
+  }
+  env_mutex.acquire()
+  // Simulate a Windows-style SDK path with backslashes
+  @sys.set_env_var("ANDROID_HOME", "C:\\Users\\mbt\\AppData\\Local\\Android\\Sdk")
+  generate(config)
+  // Verify backslashes are converted to forward slashes in local.properties
+  inspect(
+    read_text("\{name}/local.properties"),
+    content="sdk.dir=C:/Users/mbt/AppData/Local/Android/Sdk\n",
+  )
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
+  @fs.rmdir(name, recursive=true)
+}
+
+///|
 async test "generate skips existing directory" {
   let config = derive_names("GenTestSkip", "landscape", "testuser")
   let name = config.project_name

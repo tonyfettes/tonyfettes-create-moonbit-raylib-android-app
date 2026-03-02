@@ -185,7 +185,21 @@ async fn generate(config : ProjectConfig) -> Unit raise Error {
   let lp_path = "\{name}/local.properties"
   match detect_android_sdk() {
     Some(dir) => {
-      write_file(lp_path, "sdk.dir=\{dir}\n")
+      // Replace backslashes with forward slashes for Java .properties
+      // compatibility — Java treats \ as an escape character in .properties
+      // files, mangling Windows paths like C:\Users\... into C:Users\...
+      let escaped_dir = {
+        let buf = StringBuilder::new()
+        for ch in dir {
+          if ch == '\\' {
+            buf.write_char('/')
+          } else {
+            buf.write_char(ch)
+          }
+        }
+        buf.to_string()
+      }
+      write_file(lp_path, "sdk.dir=\{escaped_dir}\n")
       println("Detected Android SDK, wrote local.properties")
     }
     None =>
