@@ -194,6 +194,15 @@ async fn generate(config : ProjectConfig) -> Unit raise Error {
       )
   }
 
+  // Initialize git repository
+  println("Initializing git repository...")
+  let git_init_code = @process.run("git", ["init"], cwd=name)
+  if git_init_code != 0 {
+    println(
+      "Warning: 'git init' exited with code \{git_init_code}. You may need to run it manually.",
+    )
+  }
+
   // Success message
   println("")
   println("Project '\{name}' created successfully!")
