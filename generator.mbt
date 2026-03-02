@@ -18,7 +18,7 @@ async fn write_executable(path : String, content : String) -> Unit {
 
 ///|
 /// Generate the complete project
-async fn generate(config : ProjectConfig) -> Unit {
+async fn generate(config : ProjectConfig) -> Unit raise Error {
   let name = config.project_name
   let pkg = config.package_id
 
@@ -134,16 +134,25 @@ async fn generate(config : ProjectConfig) -> Unit {
     )
   }
 
-  // Try to detect Android SDK and write local.properties directly via shell
+  // Try to detect Android SDK and write local.properties
   let lp_path = "\{name}/local.properties"
-  let shell_cmd = "if [ -n \"$ANDROID_HOME\" ]; then printf 'sdk.dir=%s\\n' \"$ANDROID_HOME\"; elif [ -n \"$ANDROID_SDK_ROOT\" ]; then printf 'sdk.dir=%s\\n' \"$ANDROID_SDK_ROOT\"; else exit 1; fi"
-  let detect_exit = @process.run(
-    "sh",
-    ["-c", shell_cmd],
-    stdout=@process.redirect_to_file(lp_path, create=0o644),
-  )
-  if detect_exit == 0 {
+  let sdk_dir : String? = match @sys.get_env_var("ANDROID_HOME") {
+    Some(v) => Some(v)
+    None => @sys.get_env_var("ANDROID_SDK_ROOT")
+  }
+  let sdk_detected = match sdk_dir {
+    Some(dir) => {
+      write_file(lp_path, "sdk.dir=\{dir}\n")
+      true
+    }
+    None => false
+  }
+  if sdk_detected {
     println("Detected Android SDK, wrote local.properties")
+  } else {
+    raise Failure::Failure(
+      "Could not detect Android SDK. Please set ANDROID_HOME or ANDROID_SDK_ROOT.",
+    )
   }
 
   // Success message
@@ -152,9 +161,6 @@ async fn generate(config : ProjectConfig) -> Unit {
   println("")
   println("Next steps:")
   println("  cd \{name}")
-  if detect_exit != 0 {
-    println("  echo \"sdk.dir=/path/to/Android/sdk\" > local.properties")
-  }
   println("  ./gradlew assembleDebug --no-daemon")
   println("")
   println("Install on device:")

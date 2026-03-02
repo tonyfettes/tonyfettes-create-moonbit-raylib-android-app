@@ -66,7 +66,12 @@ async fn main {
   }
 
   let config = derive_names(project_name, orientation, module_owner)
-  generate(config)
+  try {
+    generate(config)
+  } catch {
+    Failure::Failure(msg) => println("Error: \{msg}")
+    _ => println("Error: unexpected error")
+  }
 }
 
 ///|

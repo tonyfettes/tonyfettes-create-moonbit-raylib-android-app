@@ -4,6 +4,10 @@ async fn read_text(path : String) -> String {
 }
 
 ///|
+/// Mutex to serialize tests that set ANDROID_HOME
+let env_mutex : @semaphore.Semaphore = @semaphore.Semaphore::new(1)
+
+///|
 async test "generate creates directory structure" {
   let config = derive_names("GenTestDirs", "landscape", "testuser")
   let name = config.project_name
@@ -11,6 +15,8 @@ async test "generate creates directory structure" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   // Verify directories exist
   assert_true(@fs.exists(name))
@@ -25,6 +31,8 @@ async test "generate creates directory structure" {
   assert_true(@fs.exists("\{name}/app/src/main/res/xml"))
   assert_true(@fs.exists("\{name}/gradle/wrapper"))
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
@@ -35,6 +43,8 @@ async test "generate creates root files with correct content" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   inspect(
     read_text("\{name}/.gitignore"),
@@ -393,6 +403,8 @@ async test "generate creates root files with correct content" {
     ),
   )
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
@@ -403,6 +415,8 @@ async test "generate creates gradle wrapper files" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   inspect(
     read_text("\{name}/gradle/libs.versions.toml"),
@@ -444,6 +458,8 @@ async test "generate creates gradle wrapper files" {
   // Verify gradle-wrapper.jar exists
   assert_true(@fs.exists("\{name}/gradle/wrapper/gradle-wrapper.jar"))
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
@@ -455,6 +471,8 @@ async test "generate creates android and app files" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   inspect(
     read_text("\{name}/app/build.gradle.kts"),
@@ -633,6 +651,8 @@ async test "generate creates android and app files" {
     ),
   )
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
@@ -643,6 +663,8 @@ async test "generate creates resource files" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   inspect(
     read_text("\{name}/app/src/main/res/values/colors.xml"),
@@ -822,6 +844,8 @@ async test "generate creates resource files" {
     ),
   )
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
@@ -832,6 +856,8 @@ async test "generate creates moonbit and cmake files" {
   if @fs.exists(name) {
     @fs.rmdir(name, recursive=true)
   }
+  env_mutex.acquire()
+  @sys.set_env_var("ANDROID_HOME", "/tmp/fake-sdk")
   generate(config)
   inspect(
     read_text("\{name}/app/src/main/cpp/CMakeLists.txt"),
@@ -995,6 +1021,8 @@ async test "generate creates moonbit and cmake files" {
     ),
   )
   // Cleanup
+  @sys.unset_env_var("ANDROID_HOME")
+  env_mutex.release()
   @fs.rmdir(name, recursive=true)
 }
 
