@@ -172,12 +172,16 @@ async fn generate(config : ProjectConfig) -> Unit raise Error {
   write_file("\{moonbit_dir}/moon.mod.json", gen_moon_mod_json(config))
   write_file("\{moonbit_dir}/moon.pkg", gen_moon_pkg_content())
 
-  // Run moon install to fetch dependencies
+  // Run moon add to fetch the latest version of tonyfettes/raylib
   println("Installing MoonBit dependencies...")
-  let exit_code = @process.run("moon", ["install"], cwd=moonbit_dir)
+  let exit_code = @process.run(
+    "moon",
+    ["add", "tonyfettes/raylib"],
+    cwd=moonbit_dir,
+  )
   if exit_code != 0 {
     println(
-      "Warning: 'moon install' exited with code \{exit_code}. You may need to run it manually.",
+      "Warning: 'moon add tonyfettes/raylib' exited with code \{exit_code}. You may need to run it manually.",
     )
   }
 

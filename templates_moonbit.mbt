@@ -36,7 +36,7 @@ fn gen_moon_mod_json(c : ProjectConfig) -> String {
     $|  "name": "\{module_name}",
     #|  "version": "0.1.0",
     #|  "deps": {
-    #|    "tonyfettes/raylib": "0.2.2"
+    #|    "tonyfettes/raylib": "0.2.3"
     #|  },
     #|  "preferred-target": "native"
     #|}
