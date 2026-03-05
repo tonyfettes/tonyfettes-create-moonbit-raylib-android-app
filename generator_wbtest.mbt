@@ -54,7 +54,7 @@ async test "generate creates root files with correct content" {
       #|/local.properties
       #|.idea/
       #|.DS_Store
-      #|/build
+      #|build/
       #|/captures
       #|.externalNativeBuild
       #|.cxx

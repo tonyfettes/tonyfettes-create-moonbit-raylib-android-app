@@ -8,7 +8,7 @@ test "gitignore" {
       #|/local.properties
       #|.idea/
       #|.DS_Store
-      #|/build
+      #|build/
       #|/captures
       #|.externalNativeBuild
       #|.cxx
